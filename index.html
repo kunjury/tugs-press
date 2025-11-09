@@ -338,6 +338,27 @@
         object-fit: cover;
         display: block;
       }
+      /* custom video play/pause button (overlay) */
+      .video-toggle {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.6);
+        color: #fff;
+        border: 0;
+        width: 72px;
+        height: 72px;
+        border-radius: 999px;
+        display: grid;
+        place-items: center;
+        font-size: 28px;
+        cursor: pointer;
+        box-shadow: 0 8px 24px rgba(2, 6, 23, 0.45);
+      }
+      .video-toggle:focus {
+        outline: 2px solid rgba(255, 255, 255, 0.9);
+      }
       .chip {
         position: absolute;
         top: 16px;
@@ -665,12 +686,12 @@
           <video
             class="steps-video"
             src="video/intro.mp4"
-            autoplay
             loop
             playsinline
-            poster="img/hero-print.png"
+            preload="metadata"
             aria-hidden="true"
           ></video>
+          <button class="video-toggle" aria-label="Play video">▶</button>
           <span class="chip">Бичлэг</span>
         </div>
         <div class="timeline">
@@ -865,6 +886,55 @@
       })();
     </script>
     <script>
+      // Video play/pause overlay: start paused; user-initiated play will unmute and play with sound.
+      (function () {
+        const video = document.querySelector(".steps-video");
+        const btn = document.querySelector(".video-toggle");
+        if (!video || !btn) return;
+
+        // keep video paused on load
+        video.pause();
+
+        function updateButton() {
+          if (video.paused) {
+            btn.textContent = "▶";
+            btn.setAttribute("aria-label", "Play video");
+          } else {
+            btn.textContent = "⏸";
+            btn.setAttribute("aria-label", "Pause video");
+          }
+        }
+
+        btn.addEventListener("click", function () {
+          if (video.paused) {
+            // unmute on user gesture so sound will play
+            try {
+              video.muted = false;
+            } catch (e) {}
+            video.play().catch(() => {});
+          } else {
+            video.pause();
+          }
+          updateButton();
+        });
+
+        // update icon when user uses native controls / keyboard
+        video.addEventListener("play", updateButton);
+        video.addEventListener("pause", updateButton);
+
+        // space/enter keyboard support when focused
+        btn.addEventListener("keydown", (e) => {
+          if (e.key === " " || e.key === "Enter") {
+            e.preventDefault();
+            btn.click();
+          }
+        });
+
+        // initialize
+        updateButton();
+      })();
+    </script>
+    <script>
       // Simple i18n: translations + runtime that swaps elements with `data-i18n`
       (function () {
         const KEY = "site_lang";
@@ -903,7 +973,7 @@
             "about.phoneLabel": "Утас:",
             "about.phone": "+976 96961800",
             "about.emailLabel": "И-мэйл:",
-            "about.email": "info@example.com",
+            "about.email": "digitalpress480@gmail.com",
             "about.hoursLabel": "Ажлын цаг:",
             "about.hours.weekdays": "Даваа–Баасан: 9:00–18:00",
             "about.hours.weekend": "Бямба: 10:00–14:00, Ням: Амарна",
@@ -940,7 +1010,7 @@
             "about.phoneLabel": "Phone:",
             "about.phone": "+976 96961800",
             "about.emailLabel": "Email:",
-            "about.email": "info@example.com",
+            "about.email": "digitalpress480@gmail.com",
             "about.hoursLabel": "Opening hours:",
             "about.hours.weekdays": "Mon–Fri: 9:00–18:00",
             "about.hours.weekend": "Sat: 10:00–14:00, Sun: Closed",
@@ -993,7 +1063,7 @@
             "about.phoneLabel": "电话：",
             "about.phone": "+976 96961800",
             "about.emailLabel": "电子邮件：",
-            "about.email": "info@example.com",
+            "about.email": "digitalpress480@gmail.com",
             "about.hoursLabel": "营业时间：",
             "about.hours.weekdays": "周一–周五: 9:00–18:00",
             "about.hours.weekend": "周六: 10:00–14:00, 周日: 休息",
