@@ -666,7 +666,6 @@
             class="steps-video"
             src="video/intro.mp4"
             autoplay
-            muted
             loop
             playsinline
             poster="img/hero-print.png"
@@ -1062,19 +1061,28 @@
           }
         }
 
-        // init language: prefer stored, then browser lang, then Mongolian default
+        // init language: prefer stored choice, then document <html lang>, then browser language, then 'mn'
         (function initLang() {
-          let lang = "mn";
+          let lang = document.documentElement.lang || "mn";
           try {
             const stored = localStorage.getItem(KEY);
-            if (stored) lang = stored;
-            else if (navigator.language) {
-              const nl = navigator.language.toLowerCase();
-              if (nl.startsWith("zh")) lang = "zh";
-              else if (nl.startsWith("en")) lang = "en";
+            if (stored) {
+              lang = stored;
+            } else {
+              // prefer the HTML lang attribute if present (set in the file)
+              const htmlLang = (
+                document.documentElement.lang || ""
+              ).toLowerCase();
+              if (htmlLang) {
+                lang = htmlLang;
+              } else if (navigator.language) {
+                const nl = navigator.language.toLowerCase();
+                if (nl.startsWith("zh")) lang = "zh";
+                else if (nl.startsWith("en")) lang = "en";
+              }
             }
           } catch (e) {
-            // ignore
+            // ignore storage/access errors
           }
           applyTranslations(lang);
         })();
